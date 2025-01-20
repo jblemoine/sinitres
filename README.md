@@ -1,6 +1,6 @@
 # Installation
 
-Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/).
+Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/), with python 3.12 (not tested with other versions).
 
 ```bash
 pip install . 
