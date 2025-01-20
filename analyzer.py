@@ -39,7 +39,7 @@ class DamageAnalyzer:
         self.generator = outlines.generate.json(self.model, DamageAnalysis)
         self.seed = seed
 
-    def prompt(self, description: str):
+    def prompt(self, description: str) -> str:
         messages = [
             {
                 "role": "system",
@@ -108,12 +108,3 @@ Description du sinistre: {description}""",
         df["sinistre"] = sinistre_id
         return df
 
-
-if __name__ == "__main__":
-    analyzer = DamageAnalyzer(device="cpu", seed=1024)
-    print(
-        analyzer.analyze(
-            "Le pare-chocs arrière est totalement déformé suite à l'impact, mais en revoyant les dégâts, je remarque qu'il s'agit plutôt d'une fissure profonde au centre du pare-chocs.",
-            "123",
-        )
-    )

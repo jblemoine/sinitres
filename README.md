@@ -16,9 +16,13 @@ Prefer GPU, but CPU is also supported (slower). It will requires approximately 2
 from analyzer import DamageAnalyzer
 
 analyzer = DamageAnalyzer(device="cpu")
-result = analyzer.analyze("Le pare-chocs avant est fissuré en plusieurs endroits avec un enfoncement sur le côté droit. La calandre est légèrement déformée mais reste fixée. Aucun dommage apparent sur les phares.", "123")
+result = analyzer.analyze(description="Le pare-chocs avant est fissuré en plusieurs endroits avec un enfoncement sur le côté droit. La calandre est légèrement déformée mais reste fixée. Aucun dommage apparent sur les phares.", sinistre_id="123")
 
 print(result)
+# Output:
+#   type_dommage piece  gravite
+# 0  fissure  pare-chocs  léger
+
 ```
 
 # Contributing
@@ -92,7 +96,6 @@ Je pourrais égelement comprendre leur mode de fonctionnement et retranscrire le
 **◦ Comment surveiller que le modèle ne dévie pas dans le temps ?**
 Il faudrait surveiller le modèle en utilisant des données de test récentes et en surveillant les prédictions, et en comparant les résultats avec des prédictions effectuées sur des données antérieures.
 Pour cela on peut effectuer des tests récurrents, par exemple chaque jour / semaine / mois.
-
 
 
 Références :
