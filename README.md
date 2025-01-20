@@ -81,7 +81,9 @@ On pourrait également essayer dans un premier de faire coincider les dommages p
 • **Propositions d’amélioration réalistes si ce projet devait se développer en d’entreprise :**
 
 Un jeu de données plus large serait nécessaire pour évaluer la généralisation du modèle.
-Il faudrait tester d'autres modèles, d'autres prompt, ou éventuellement d'autres solutions si les résultats ne sont pas satisfaisants. 
+Il faudrait tester d'autres modèles, d'autres prompt, ou éventuellement d'autres solutions si les résultats ne sont pas satisfaisants.
+
+On pourrait également fine-tune (lora) le modèle sur un jeu de données. Quelques centaines d'exemple peut suffire pour améliorer grandement les performances.
 
 **◦ Quels points d’attention ?**
 
