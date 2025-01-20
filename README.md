@@ -96,5 +96,5 @@ Pour cela on peut effectuer des tests récurrents, par exemple chaque jour / sem
 
 
 Références :
-https://huggingface.co/microsoft/Phi-3.5-mini-instruct
-https://blog.dottxt.co/coalescence.html
+- https://huggingface.co/microsoft/Phi-3.5-mini-instruct
+- https://blog.dottxt.co/coalescence.html
