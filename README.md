@@ -70,6 +70,7 @@ Côté prompt, j'ai opté pour un prompt classique avec un système message et u
 Je n'ai pas utilisé de technique très avancées compte tenu du temps imparti. J'ai tout de même veillé à être aussi précis possible et à lui fournir du contexte et des exemples.
 
 • **Proposition de métriques techniques et/ou opérationnelles d’évaluation du modèle**
+
 L'évaluation est délicate car il n'existe pas notre cas une liste exhaustive de type de dommages ou de pièces affectées.
 
 On pourrait se limiter à un nombre restreint de dommages et de pièces affectées. Puis établir une métrique de classification multi-label comme le F1-score, la Hamming Loss, etc.
@@ -83,17 +84,21 @@ Un jeu de données plus large serait nécessaire pour évaluer la généralisati
 Il faudrait tester d'autres modèles, d'autres prompt, ou éventuellement d'autres solutions si les résultats ne sont pas satisfaisants. 
 
 **◦ Quels points d’attention ?**
-J'ai eu quelques difficultés pour faire fonctionner le modèle sur GPU. Cependant j'ai testé le modèle sur CPU et il fonctionne correctement. Je laisse le choix à l'utilisateur de choisir le device et le LLM en suivant la 
+
+J'ai eu quelques difficultés pour faire fonctionner le modèle sur GPU. Cependant j'ai testé le modèle sur CPU et il fonctionne correctement. Je laisse le choix à l'utilisateur de choisir le device et le LLM en suivant la nomenclature de HuggingFace Transformers.
 
 **◦ Comment déployer et quelle puissance requise ?**
+
 Il faudrait déployer le modèle sur un serveur avec GPU, afin de pouvoir faire des inférences avec un temps de latence raisonnable. Il serait également intéressant de tester des versions optimisées du modèle, notamment des versions quantisées (à l'aide de la librairie llamacpp par exemple). La version présentée ici nécessite 20GB de VRAM, ce qui est tout de même assez conséquent pour un modèle de taille si petite.
 Il faudrait déployer le modèle à l'aide d'une API et d'une librairie capable de gérer au mieux les batch comme vllm, tgi ou triton.
 
 **◦ Si vous aviez des experts métier à disposition comment les utiliseriez-vous ?**
+
 Je pourrais leur demander d'évaluer qualitativement les résultats du modèle. Je pourrais également leur demander de fournir des exemples de données pour évaluer la généralisation du modèle.
 Je pourrais égelement comprendre leur mode de fonctionnement et retranscrire les informations dans le prompt.
 
 **◦ Comment surveiller que le modèle ne dévie pas dans le temps ?**
+
 Il faudrait surveiller le modèle en utilisant des données de test récentes et en surveillant les prédictions, et en comparant les résultats avec des prédictions effectuées sur des données antérieures.
 Pour cela on peut effectuer des tests récurrents, par exemple chaque jour / semaine / mois.
 
