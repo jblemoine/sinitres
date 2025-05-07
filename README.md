@@ -92,26 +92,26 @@ Other models, prompts, or potentially other solutions should be tested if the re
 
 We could also fine-tune (lora) the model on a dataset. A few hundred examples might be sufficient to greatly improve performance.
 
-**◦ What points of attention?**
+• **What points of attention?**
 
 I had some difficulties getting the model to work on GPU. However, I tested the model on CPU and it works correctly. I leave the choice to the user to select the device and LLM following the HuggingFace Transformers nomenclature.
 
-**◦ How to deploy and what power is required?**
+• **How to deploy and what power is required?**
 
 The model should be deployed on a server with GPU to enable inference with reasonable latency. It would also be interesting to test optimized versions of the model, particularly quantized versions (using the llamacpp library for example). The version presented here requires 20GB of VRAM, which is quite substantial for such a small model.
 The model should be deployed using an API and a library capable of best managing batches like vllm, tgi, or TensorRT.
 
-**◦ If you had domain experts available, how would you use them?**
+• **If you had domain experts available, how would you use them?**
 
 I could ask them to qualitatively evaluate the model's results. I could also ask them to provide example data to evaluate the model's generalization.
 I could also understand their operational mode and transcribe the information into the prompt.
 
-**◦ How to monitor that the model doesn't drift over time?**
+• **How to monitor that the model doesn't drift over time?**
 
 The model should be monitored using recent test data and by monitoring predictions, comparing results with predictions made on previous data.
 For this, recurring tests can be performed, for example daily/weekly/monthly.
 
 
-Références :
+References :
 - https://huggingface.co/microsoft/Phi-3.5-mini-instruct
 - https://blog.dottxt.co/coalescence.html
