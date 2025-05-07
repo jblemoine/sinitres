@@ -25,3 +25,6 @@ wheels/
 .mypy_cache/
 dmypy.json
 dmypy.sock
+
+# uv 
+uv.lock
