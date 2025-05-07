@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 import outlines
 import pandas as pd
@@ -8,15 +7,13 @@ from pydantic import BaseModel
 from transformers import AutoTokenizer
 
 
-# Define enums for constrained fields
 class DamageSeverity(str, Enum):
-    NONE = "aucun"
-    LIGHT = "léger"
-    MODERATE = "modéré"
-    SEVERE = "grave"
+    NONE = "none"
+    LIGHT = "light"
+    MODERATE = "moderate"
+    SEVERE = "severe"
 
 
-# Define the output structure using Pydantic
 class Damage(BaseModel):
     type_dommage: str
     gravite: DamageSeverity
@@ -24,7 +21,7 @@ class Damage(BaseModel):
 
 
 class DamageAnalysis(BaseModel):
-    dommages: List[Damage]
+    dommages: list[Damage]
 
 
 class DamageAnalyzer:
@@ -43,53 +40,50 @@ class DamageAnalyzer:
         messages = [
             {
                 "role": "system",
-                "content": "Tu es un expert en analyse de sinistres automobiles."
-                "Ta tâche est d'extraire les informations clées des descriptions de dommages.",
+                "content": "You are an expert in analyzing car accident descriptions."
+                "Your task is to extract the key information from the damage descriptions.",
             },
             {
                 "role": "user",
                 "content": f"""# Instructions: 
-Analyse la description suivante et fournis une réponse structurée avec une liste de dommages. 
-Pour chaque dommage, fournis le type de dommage, sa gravité (aucun/léger/modéré/grave) et la pièce du véhicule affectée.
+Analyze the following description and provide a structured response with a list of damages. 
+For each damage, provide the type of damage, its severity (none/light/moderate/severe) and the affected vehicle part.
 
-Le format de la réponse doit être un JSON valide, avec le schéma suivant : 
+The format of the response must be a valid JSON, with the following schema: 
  {{
     "dommages": [
         {{
-            "type_dommage": <Type de dommage (par exemple : "impact avant gauche", "rayure", “aucun”, ...).>,
-            "gravite": <Gravité du dommage (parmi : "léger", "modéré", "grave", “aucun”).>,
-            "piece": <Estimation de la pièce du véhicule affectée (par exemple : "pare-chocs avant", "portière avant gauche", ...).>
+            "type_dommage": <Type of damage (for example: "left front impact", "scratch", "none", ...).>,
+            "gravite": <Severity of the damage (either: "light", "moderate", "severe", "none").>,
+            "piece": <Estimation of the affected vehicle part (for example: "front bumper", "left door", ...).>
         }}
     ]
 }}
 
-# Example: 
-Exemple de description: 
-Le pare-chocs avant est fissuré en plusieurs endroits avec un enfoncement sur le côté droit. La calandre est légèrement déformée mais reste fixée. Aucun dommage apparent sur les phares.
-
-Exemple de sortie attendue:
+Input: The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached. No apparent damage to the headlights.
+Output:
 {{
     "dommages": [
         {{
-            "type_dommage": "Fissure, enfoncement",
-            "gravite": "grave",
-            "piece": "pare-chocs avant"
+            "type_dommage": "Crack, dent",
+            "gravite": "severe",
+            "piece": "front bumper"
         }},
         {{
-            "type_dommage": "aucun",
-            "gravite": "aucun",
-            "piece": "phare"
+            "type_dommage": "none",
+            "gravite": "none",
+            "piece": "headlight"
         }},
         {{
-            "type_dommage": "déformation légère",
-            "gravite": "leger",
-            "piece": "calandre"
+            "type_dommage": "light deformation",
+            "gravite": "light",
+            "piece": "grille"
         }}
     ]
 }}
-
-# Input: 
-Description du sinistre: {description}""",
+Input: {description}
+Output:
+""",
             },
         ]
 
@@ -107,4 +101,3 @@ Description du sinistre: {description}""",
         df = pd.DataFrame([damage.model_dump() for damage in damages])
         df["sinistre"] = sinistre_id
         return df
-

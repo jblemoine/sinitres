@@ -1,6 +1,6 @@
 # Installation
 
-Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/), with python 3.12 (not tested with other versions).
+Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/).
 
 ```bash
 pip install . 
@@ -16,12 +16,14 @@ Prefer GPU, but CPU is also supported (slower). It will requires approximately 2
 from analyzer import DamageAnalyzer
 
 analyzer = DamageAnalyzer(device="cpu")
-result = analyzer.analyze(description="Le pare-chocs avant est fissuré en plusieurs endroits avec un enfoncement sur le côté droit. La calandre est légèrement déformée mais reste fixée. Aucun dommage apparent sur les phares.", sinistre_id="123")
+result = analyzer.analyze(description="The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached. No apparent damage to the headlights.", sinistre_id="123")
 
 print(result)
 # Output:
 #   type_dommage piece  gravite
-# 0  fissure  pare-chocs  léger
+# 0  crack, dent  front bumper  severe
+# 1  none  headlight  none
+# 2  light deformation  grille  light
 
 ```
 
@@ -53,56 +55,61 @@ ruff check . --fix
 ruff format .
 ```
 
+## Context 
 
-## Présentation et réponse aux questions
-
-• **Choix du modèle et de l’architecture de la solution, entrainement, inférence et licence.**
-
-J'ai choisi de combiner le LLM Phi-3.5-mini-instruct et la librairie outlines pour la génération de données structurées.
-
-J'ai choisi cette approche car elle ne demande pas de faire de pré-entrainement et est très performante.
-J'ai opté pour Phi-3.5-mini-instruct car c'est un très petit modèle (3B de paramètres), avec de bonnes performances, notamment sur les tâches multilangues (en français dans notre cas). D'après les benchmarks, il est très proche des modèles de taille 7/8B.
-La licence MIT du modèle est très permissive et est compatible avec une utilisation commerciale.
-
-J'ai opté pour la librairie outlines car elle permet de générer des données structurées en utilisant des LLM. En outre avec outlines le temps d'inférence n'est pas ralongé et l'adéquation au schéma fourni est assurée à 100% (contrairement à d'autres librairies comme instructor).
-
-Côté prompt, j'ai opté pour un prompt classique avec un système message et un user message.
-Je n'ai pas utilisé de technique très avancées compte tenu du temps imparti. J'ai tout de même veillé à être aussi précis possible et à lui fournir du contexte et des exemples.
-
-• **Proposition de métriques techniques et/ou opérationnelles d’évaluation du modèle**
-
-L'évaluation est délicate car il n'existe pas notre cas une liste exhaustive de type de dommages ou de pièces affectées.
-
-On pourrait se limiter à un nombre restreint de dommages et de pièces affectées. Puis établir une métrique de classification multi-label comme le F1-score, la Hamming Loss, etc.
+This project is a simple example of how to use a LLM to analyze a description of a car accident and return a structured output.
+It was made as a proof of concept for an interview, and is not intended to be used in production.
 
 
-On pourrait également essayer dans un premier de faire coincider les dommages prédits avec les dommages réels, puis de calculer le pourcentage de dommages prédits correctement à l'aide d'une fonction de similarité.
 
-• **Propositions d’amélioration réalistes si ce projet devait se développer en d’entreprise :**
+## Presentation and answers to questions
 
-Un jeu de données plus large serait nécessaire pour évaluer la généralisation du modèle.
-Il faudrait tester d'autres modèles, d'autres prompt, ou éventuellement d'autres solutions si les résultats ne sont pas satisfaisants.
+• **Choice of model and solution architecture, training, inference and license.**
 
-On pourrait également fine-tune (lora) le modèle sur un jeu de données. Quelques centaines d'exemple peut suffire pour améliorer grandement les performances.
+I chose to combine the Phi-3.5-mini-instruct LLM and the outlines library for structured data generation.
 
-**◦ Quels points d’attention ?**
+I chose this approach because it doesn't require pre-training and is very effective.
+I opted for Phi-3.5-mini-instruct because it's a very small model (3B parameters), with good performance, especially on multilingual tasks (in French in our case, the original usecase was in French). According to benchmarks, its performance is very close to 7/8B-sized models.
+The model's MIT license is very permissive and compatible with commercial use.
 
-J'ai eu quelques difficultés pour faire fonctionner le modèle sur GPU. Cependant j'ai testé le modèle sur CPU et il fonctionne correctement. Je laisse le choix à l'utilisateur de choisir le device et le LLM en suivant la nomenclature de HuggingFace Transformers.
+I chose the outlines library because it allows generating structured data using LLMs. Additionally, with outlines the inference time is almost not extended and adherence to the provided schema is 100% guaranteed (unlike other libraries like instructor, which under the hood uses a retry mechanism).
 
-**◦ Comment déployer et quelle puissance requise ?**
+For the prompt, I opted for a classic prompt with a system message and a user message.
+I didn't use very advanced techniques given the time constraints. Nevertheless, I made sure to be as precise as possible and to provide context and examples.
 
-Il faudrait déployer le modèle sur un serveur avec GPU, afin de pouvoir faire des inférences avec un temps de latence raisonnable. Il serait également intéressant de tester des versions optimisées du modèle, notamment des versions quantisées (à l'aide de la librairie llamacpp par exemple). La version présentée ici nécessite 20GB de VRAM, ce qui est tout de même assez conséquent pour un modèle de taille si petite.
-Il faudrait déployer le modèle à l'aide d'une API et d'une librairie capable de gérer au mieux les batch comme vllm, tgi ou triton.
+• **Proposal for technical and/or operational metrics for model evaluation**
 
-**◦ Si vous aviez des experts métier à disposition comment les utiliseriez-vous ?**
+Evaluation is challenging because in our case there is no exhaustive list of damage types or affected parts.
 
-Je pourrais leur demander d'évaluer qualitativement les résultats du modèle. Je pourrais également leur demander de fournir des exemples de données pour évaluer la généralisation du modèle.
-Je pourrais égelement comprendre leur mode de fonctionnement et retranscrire les informations dans le prompt.
+We could limit ourselves to a restricted number of damages and affected parts. Then establish a multi-label classification metric such as F1-score, Hamming Loss, etc.
 
-**◦ Comment surveiller que le modèle ne dévie pas dans le temps ?**
+We could also initially try to match predicted damages with actual damages, then calculate the percentage of correctly predicted damages using a similarity function.
 
-Il faudrait surveiller le modèle en utilisant des données de test récentes et en surveillant les prédictions, et en comparant les résultats avec des prédictions effectuées sur des données antérieures.
-Pour cela on peut effectuer des tests récurrents, par exemple chaque jour / semaine / mois.
+• **Realistic improvement proposals if this project were to be developed in a business context:**
+
+A larger dataset would be necessary to evaluate the model's generalization.
+Other models, prompts, or potentially other solutions should be tested if the results are not satisfactory.
+
+We could also fine-tune (lora) the model on a dataset. A few hundred examples might be sufficient to greatly improve performance.
+
+**◦ What points of attention?**
+
+I had some difficulties getting the model to work on GPU. However, I tested the model on CPU and it works correctly. I leave the choice to the user to select the device and LLM following the HuggingFace Transformers nomenclature.
+
+**◦ How to deploy and what power is required?**
+
+The model should be deployed on a server with GPU to enable inference with reasonable latency. It would also be interesting to test optimized versions of the model, particularly quantized versions (using the llamacpp library for example). The version presented here requires 20GB of VRAM, which is quite substantial for such a small model.
+The model should be deployed using an API and a library capable of best managing batches like vllm, tgi, or TensorRT.
+
+**◦ If you had domain experts available, how would you use them?**
+
+I could ask them to qualitatively evaluate the model's results. I could also ask them to provide example data to evaluate the model's generalization.
+I could also understand their operational mode and transcribe the information into the prompt.
+
+**◦ How to monitor that the model doesn't drift over time?**
+
+The model should be monitored using recent test data and by monitoring predictions, comparing results with predictions made on previous data.
+For this, recurring tests can be performed, for example daily/weekly/monthly.
 
 
 Références :

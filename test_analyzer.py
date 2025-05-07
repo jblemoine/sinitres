@@ -2,7 +2,7 @@ from analyzer import DamageAnalyzer
 
 
 def test_damage_analyzer():
-    description = "Le pare-chocs arrière est totalement déformé suite à l'impact, mais en revoyant les dégâts, je remarque qu'il s'agit plutôt d'une fissure profonde au centre du pare-chocs."
+    description = "The rear bumper is completely deformed due to the impact, but upon closer inspection, it appears to be a deep crack in the center of the bumper."
     analyzer = DamageAnalyzer(
         device="cpu", seed=100, model_name="microsoft/Phi-3.5-mini-instruct"
     )
