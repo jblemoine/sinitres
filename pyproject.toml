@@ -3,17 +3,19 @@ name = "sinistres"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
-    "accelerate>=1.3.0",
+    "setuptools",
     "datasets>=3.2.0",
     "outlines[transformers]>=0.1.13",
-    "pandas>=2.2.3",
     "pydantic>=2.10.5",
     "sentencepiece>=0.2.0",
-    "torch>=2.5.1",
-    "transformers>=4.48.1",
-]
+    "torch==2.6.0",
+    "transformers>=4.50.0",
+    "bitsandbytes>=0.43.1",
+    "accelerate>=0.29.0",
+    "flash-attn==2.7.4.post1",
+    ]
 
 [dependency-groups]
 dev = [

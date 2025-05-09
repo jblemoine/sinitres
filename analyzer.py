@@ -1,10 +1,7 @@
+import json
 from enum import Enum
 
-import outlines
-import pandas as pd
-import torch
 from pydantic import BaseModel
-from transformers import AutoTokenizer
 
 
 class DamageSeverity(str, Enum):
@@ -15,28 +12,60 @@ class DamageSeverity(str, Enum):
 
 
 class Damage(BaseModel):
-    type_dommage: str
-    gravite: DamageSeverity
-    piece: str
+    damage_type: str
+    severity: DamageSeverity
+    part: str
 
 
 class DamageAnalysis(BaseModel):
-    dommages: list[Damage]
+    damages: list[Damage]
 
 
 class DamageAnalyzer:
+    """
+    Analyze the damage description and return a list of damages.
+    Args:
+        model_name: The repo_id of the model to use, download from https://huggingface.co/models
+    """
     def __init__(
         self,
-        model_name: str = "microsoft/Phi-3-mini-4k-instruct",
-        device: str = "cuda" if torch.cuda.is_available() else "cpu",
-        seed: int | None = None,
+        model_name: str,
     ):
-        self.model = outlines.models.transformers(model_name, device=device)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.generator = outlines.generate.json(self.model, DamageAnalysis)
-        self.seed = seed
+        from outlines.models import TransformerTokenizer
+        from outlines.processors.structured import JSONLogitsProcessor
+        from transformers import (
+            AutoModelForCausalLM,
+            AutoTokenizer,
+            BitsAndBytesConfig,
+            LogitsProcessorList,
+            pipeline,
+        )
 
-    def prompt(self, description: str) -> str:
+        # init model
+        self.model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+            torch_dtype="auto",
+            device_map="auto",
+            quantization_config=BitsAndBytesConfig(load_in_8bit=True),
+            trust_remote_code=True,
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+        self.pipeline = pipeline(
+            "text-generation",
+            model=self.model,
+            tokenizer=self.tokenizer,
+        )
+        # init tokenizer and logits processor
+        self.outlines_tokenizer = TransformerTokenizer(self.tokenizer)
+        self.outlines_logits_processor = JSONLogitsProcessor(
+            schema=DamageAnalysis, tokenizer=self.outlines_tokenizer
+        )
+        self.logits_processor_list = LogitsProcessorList(
+            [self.outlines_logits_processor]
+        )
+
+    def prompt(self, description: str) -> list[dict]:
         messages = [
             {
                 "role": "system",
@@ -51,53 +80,59 @@ For each damage, provide the type of damage, its severity (none/light/moderate/s
 
 The format of the response must be a valid JSON, with the following schema: 
  {{
-    "dommages": [
+    "damages": [
         {{
-            "type_dommage": <Type of damage (for example: "left front impact", "scratch", "none", ...).>,
-            "gravite": <Severity of the damage (either: "light", "moderate", "severe", "none").>,
-            "piece": <Estimation of the affected vehicle part (for example: "front bumper", "left door", ...).>
+            "damage_type": <Type of damage (for example: "left front impact", "scratch", "none", ...).>,
+            "severity": <Severity of the damage (either: "light", "moderate", "severe", "none").>,
+            "part": <Estimation of the affected vehicle part (for example: "front bumper", "left door", ...).>
         }}
     ]
 }}
 
-Input: The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached. No apparent damage to the headlights.
+# Example:
+Description: The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached.
 Output:
-{{
-    "dommages": [
-        {{
-            "type_dommage": "Crack, dent",
-            "gravite": "severe",
-            "piece": "front bumper"
-        }},
-        {{
-            "type_dommage": "none",
-            "gravite": "none",
-            "piece": "headlight"
-        }},
-        {{
-            "type_dommage": "light deformation",
-            "gravite": "light",
-            "piece": "grille"
-        }}
-    ]
-}}
-Input: {description}
+{
+                    json.dumps(
+                        DamageAnalysis(
+                            damages=[
+                                Damage(
+                                    damage_type="crack, dent",
+                                    severity="severe",
+                                    part="front bumper",
+                                ),
+                                Damage(
+                                    damage_type="light deformation",
+                                    severity="light",
+                                    part="grille",
+                                ),
+                            ]
+                        ).model_dump(mode="json")
+                    )
+                }
+
+# Input:
+Description: {description}
 Output:
 """,
             },
         ]
 
-        prompt = self.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_bos=True, add_generation_prompt=True
-        )
+        return messages
 
-        return prompt
-
-    def analyze(self, description: str, sinistre_id: str) -> pd.DataFrame:
+    def analyze(self, description: str) -> DamageAnalysis:
         """
         Analyze the damage description and return a list of damages as a pandas DataFrame.
         """
-        damages = self.generator(self.prompt(description), seed=self.seed).dommages
-        df = pd.DataFrame([damage.model_dump() for damage in damages])
-        df["sinistre"] = sinistre_id
-        return df
+        messages = self.prompt(description)
+        completion = self.pipeline(
+            messages,
+            max_new_tokens=1024,
+            do_sample=False,
+            temperature=0.0,
+            use_cache=True,
+            return_full_text=False,
+            logits_processor=self.logits_processor_list,
+        )
+        analysis = DamageAnalysis.model_validate_json(completion[0]["generated_text"])
+        return analysis

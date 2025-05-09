@@ -3,7 +3,7 @@
 Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/).
 
 ```bash
-pip install . 
+pip install . --no-build-isolation # --no-build-isolation is necessary for flash-attn
 ```
 
 # Hardware requirements
@@ -15,16 +15,18 @@ Prefer GPU, but CPU is also supported (slower). It will requires approximately 2
 ```python
 from analyzer import DamageAnalyzer
 
-analyzer = DamageAnalyzer(device="cpu")
-result = analyzer.analyze(description="The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached. No apparent damage to the headlights.", sinistre_id="123")
+analyzer = DamageAnalyzer(model_name="google/gemma-3-1b-it")
+result = analyzer.analyze(description="The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached. No apparent damage to the headlights.")
 
 print(result)
-# Output:
-#   type_dommage piece  gravite
-# 0  crack, dent  front bumper  severe
-# 1  none  headlight  none
-# 2  light deformation  grille  light
 
+# Output:
+# DamageAnalysis(
+#     damages=[
+#         Damage(damage_type="crack, dent", severity="severe", part="front bumper"),
+#         Damage(damage_type="light deformation", severity="light", part="grille"),
+#     ]
+# )
 ```
 
 # Contributing
@@ -61,8 +63,7 @@ This project is a simple example of how to use a LLM to analyze a description of
 It was made as a proof of concept for an interview, and is not intended to be used in production.
 
 
-
-## Presentation and answers to questions
+## Presentation and answers to questions for the interview
 
 • **Choice of model and solution architecture, training, inference and license.**
 
