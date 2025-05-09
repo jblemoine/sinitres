@@ -57,6 +57,14 @@ ruff check . --fix
 ruff format .
 ```
 
+###  Pre-commit
+
+Pre-commit is used to run the linter and formatter before each commit.
+
+```bash
+pre-commit run --all-files
+```
+
 ## Context 
 
 This project is a simple example of how to use a LLM to analyze a description of a car accident and return a structured output.

@@ -27,6 +27,7 @@ class DamageAnalyzer:
     Args:
         model_name: The repo_id of the model to use, download from https://huggingface.co/models
     """
+
     def __init__(
         self,
         model_name: str,
