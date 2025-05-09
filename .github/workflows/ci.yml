@@ -28,4 +28,6 @@ jobs:
       run: mypy .
       
     - name: Run tests with pytest
-      run: pytest 
+      run: pytest
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
