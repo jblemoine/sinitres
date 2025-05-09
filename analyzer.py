@@ -1,13 +1,14 @@
-import json
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Damage(BaseModel):
-    damage_type: str
-    severity: Literal["light", "moderate", "severe"] | None
-    part: str
+    damage_type: str = Field(description="The type of damage.")
+    severity: Literal["light", "moderate", "severe"] | None = Field(
+        description="The severity of the damage."
+    )
+    part: str = Field(description="The part of the vehicle that is damaged.")
 
 
 class DamageAnalysis(BaseModel):
@@ -74,40 +75,10 @@ class DamageAnalyzer:
                 "role": "user",
                 "content": f"""# Instructions: 
 Analyze the following description and provide a structured response with a list of damages. 
-For each damage, provide the type of damage, its severity (none/light/moderate/severe) and the affected vehicle part.
+For each damage, provide the type of damage, its severity (light/moderate/severe/none) and the affected vehicle part.
 
 The format of the response must be a valid JSON, with the following schema: 
- {{
-    "damages": [
-        {{
-            "damage_type": <Type of damage (for example: "left front impact", "scratch", "none", ...).>,
-            "severity": <Severity of the damage (either: "light", "moderate", "severe", "none").>,
-            "part": <Estimation of the affected vehicle part (for example: "front bumper", "left door", ...).>
-        }}
-    ]
-}}
-
-# Example:
-Description: The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached.
-Output:
-{
-                    json.dumps(
-                        DamageAnalysis(
-                            damages=[
-                                Damage(
-                                    damage_type="crack, dent",
-                                    severity="severe",
-                                    part="front bumper",
-                                ),
-                                Damage(
-                                    damage_type="light deformation",
-                                    severity="light",
-                                    part="grille",
-                                ),
-                            ]
-                        ).model_dump(mode="json")
-                    )
-                }
+{DamageAnalysis.model_json_schema()}
 
 # Input:
 Description: {description}
