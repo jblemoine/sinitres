@@ -25,6 +25,7 @@ class DamageAnalyzer:
         self,
         model_name: str,
     ):
+        import torch
         from outlines.models import TransformerTokenizer
         from outlines.processors.structured import JSONLogitsProcessor
         from transformers import (
@@ -35,12 +36,15 @@ class DamageAnalyzer:
             pipeline,
         )
 
+        quantization_config = (
+            BitsAndBytesConfig(load_in_8bit=True) if torch.cuda.is_available() else None
+        )
         # init model
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype="auto",
             device_map="auto",
-            quantization_config=BitsAndBytesConfig(load_in_8bit=True),
+            quantization_config=quantization_config,
             trust_remote_code=True,
         )
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
