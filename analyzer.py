@@ -1,19 +1,12 @@
 import json
-from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel
 
 
-class DamageSeverity(str, Enum):
-    NONE = "none"
-    LIGHT = "light"
-    MODERATE = "moderate"
-    SEVERE = "severe"
-
-
 class Damage(BaseModel):
     damage_type: str
-    severity: DamageSeverity
+    severity: Literal["light", "moderate", "severe"] | None
     part: str
 
 
