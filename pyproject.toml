@@ -14,7 +14,6 @@ dependencies = [
     "transformers>=4.50.0",
     "bitsandbytes>=0.43.1",
     "accelerate>=0.29.0",
-    "flash-attn==2.7.4.post1",
     ]
 
 [dependency-groups]

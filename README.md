@@ -3,7 +3,7 @@
 Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/).
 
 ```bash
-pip install . --no-build-isolation # --no-build-isolation is necessary for flash-attn
+pip install .
 ```
 
 # Hardware requirements
@@ -15,7 +15,7 @@ Prefer GPU, but CPU is also supported (slower). It will requires approximately 2
 ```python
 from analyzer import DamageAnalyzer
 
-analyzer = DamageAnalyzer(model_name="google/gemma-3-1b-it")
+analyzer = DamageAnalyzer(model_name="google/gemma-3-1b-it") # or any other text generation model from https://huggingface.co/models
 result = analyzer.analyze(description="The front bumper is cracked in several places with a dent on the right side. The grille is slightly deformed but remains attached. No apparent damage to the headlights.")
 
 print(result)
