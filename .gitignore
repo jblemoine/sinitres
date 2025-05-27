@@ -28,3 +28,6 @@ dmypy.sock
 
 # uv 
 uv.lock
+
+# python version
+.python-version

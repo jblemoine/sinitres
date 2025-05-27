@@ -1,6 +1,13 @@
 # Installation
 
+## Python version
+
+At least Python 3.11 is required.
+
+## Install dependencies
+
 Preferably install in a virtual environment, using `venv` or [uv](https://docs.astral.sh/uv/).
+
 
 ```bash
 pip install .
@@ -8,7 +15,7 @@ pip install .
 
 # Hardware requirements
 
-Prefer GPU, but CPU is also supported (slower). It will requires approximately 20GB of VRAM.
+Prefer GPU, but CPU is also supported (slower). VRAM requirements are dependent on the model used.
 
 # Usage 
 
@@ -37,14 +44,6 @@ Install dependencies for dev
 pip install -e .[dev]
 ```
 
-###  Testing
-
-Test are run with pytest.
-
-```bash
-python -m pytest
-```
-
 ###  Formatting and linting
 
 Formatting and linting are done with [ruff](https://github.com/astral-sh/ruff).
@@ -57,11 +56,30 @@ ruff check . --fix
 ruff format .
 ```
 
+###  Type checking
+
+Type checking is done with mypy.
+
+```bash
+mypy .
+```
+
+###  Testing
+
+Test are run with pytest.
+
+```bash
+python -m pytest
+```
 ###  Pre-commit
 
 Pre-commit is used to run the linter and formatter before each commit.
 
 ```bash
+# install pre-commit hooks
+pre-commit install
+
+# run the hooks
 pre-commit run --all-files
 ```
 
@@ -75,13 +93,18 @@ It was made as a proof of concept for an interview, and is not intended to be us
 
 • **Choice of model and solution architecture, training, inference and license.**
 
-I chose to combine the Phi-3.5-mini-instruct LLM and the outlines library for structured data generation.
+I chose the combination of a text generation model and a structured data generation library because it doesn't require pre-training and output format adherence is guaranteed.
+It's compatible with any text generation model from HuggingFace, which allows to easily test different models.
 
-I chose this approach because it doesn't require pre-training and is very effective.
-I opted for Phi-3.5-mini-instruct because it's a very small model (3B parameters), with good performance, especially on multilingual tasks (in French in our case, the original usecase was in French). According to benchmarks, its performance is very close to 7/8B-sized models.
-The model's MIT license is very permissive and compatible with commercial use.
+During my testing I opted for gemma-3-1b-it because it's a very small model (1B parameters), with good performance, especially on multilingual tasks (in French in our case, the original usecase was in French). It's also memory efficient, thanks its K-V cache optimized architecture. (I initially tested with Phi-3.5-mini-instruct, but it required 20GB of VRAM, which is quite substantial for such a small model.)
 
-I chose the outlines library because it allows generating structured data using LLMs. Additionally, with outlines the inference time is almost not extended and adherence to the provided schema is 100% guaranteed (unlike other libraries like instructor, which under the hood uses a retry mechanism).
+I chose the outlines library because it enables structured JSON generation from LLMs with guaranteed schema compliance. Key advantages include:
+
+1. **Zero overhead sampling**: Outlines pre-builds an index that maps valid tokens for each step of generation, allowing it to enforce structure without slowing down the model. This means generating structured JSON is almost just as fast as generating regular text.
+
+2. **100% schema adherence**: Unlike libraries like instructor that use retry mechanisms, outlines guarantees valid output on the first attempt through logits masking during generation.
+
+3. **Efficient token transitions**: The library uses "coalescence" - a technique that factorizes the generation process, allowing to skip decoding tokens that can be known in advance, e.g. keys in a JSON object, and then potentially speeding up the inference.
 
 For the prompt, I opted for a classic prompt with a system message and a user message.
 I didn't use very advanced techniques given the time constraints. Nevertheless, I made sure to be as precise as possible and to provide context and examples.
@@ -107,18 +130,8 @@ I had some difficulties getting the model to work on GPU. However, I tested the 
 
 • **How to deploy and what power is required?**
 
-The model should be deployed on a server with GPU to enable inference with reasonable latency. It would also be interesting to test optimized versions of the model, particularly quantized versions (using the llamacpp library for example). The version presented here requires 20GB of VRAM, which is quite substantial for such a small model.
-The model should be deployed using an API and a library capable of best managing batches like vllm, tgi, or TensorRT.
-
-• **If you had domain experts available, how would you use them?**
-
-I could ask them to qualitatively evaluate the model's results. I could also ask them to provide example data to evaluate the model's generalization.
-I could also understand their operational mode and transcribe the information into the prompt.
-
-• **How to monitor that the model doesn't drift over time?**
-
-The model should be monitored using recent test data and by monitoring predictions, comparing results with predictions made on previous data.
-For this, recurring tests can be performed, for example daily/weekly/monthly.
+The model should be deployed on a optimized framework like VLLM, SGLang, or TensorRT, that can handle the KV cache efficiently across multiple requests.
+Hopefully, outlines will be compatible with these frameworks.
 
 
 References :
