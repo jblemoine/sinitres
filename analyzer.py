@@ -17,7 +17,8 @@ class DamageAnalysis(BaseModel):
 
 class DamageAnalyzer:
     """
-    Analyze the damage description and return a list of damages.
+    Analyze the damages from a car accident description.
+
     Args:
         model_name: The repo_id of the model to use, download from https://huggingface.co/models
     """
@@ -26,6 +27,7 @@ class DamageAnalyzer:
         self,
         model_name: str,
     ):
+        # local imports to speed up the import time
         import torch
         from outlines.models import TransformerTokenizer
         from outlines.processors.structured import JSONLogitsProcessor
@@ -91,7 +93,13 @@ Output:
 
     def analyze(self, description: str) -> DamageAnalysis:
         """
-        Analyze the damage description and return a list of damages as a pandas DataFrame.
+        Analyze the damages from the description.
+
+        Args:
+            description: The description of the car accident.
+
+        Returns:
+            DamageAnalysis: The analysis of the damages.
         """
         messages = self.prompt(description)
         completion = self.pipeline(
